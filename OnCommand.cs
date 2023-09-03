@@ -122,8 +122,8 @@ namespace Playground {
                         }
                     );
                 }
-                Broadcast();
             }
+            Broadcast();
         }
     }
 }
