@@ -4,6 +4,7 @@ using Warudo.Core.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using UnityEngine;
 
 namespace Playground {
     //[NodeType(),
@@ -12,7 +13,7 @@ namespace Playground {
     Title = "CommandParser",
     Category ="Fnugus")]
     public class CommandParserNode : Node {
-        protected Dictionary<string, string> ParseDict = new Dictionary<string, string>();
+        //protected Dictionary<string, string> ParseDict = new Dictionary<string, string>();
 
         protected bool HideSubscriber() { return !(Commander?.UseTwitchSubscriberGroup??false); }
         protected bool HideModerator() { return !(Commander?.UseTwitchModeratorGroup??false); }
@@ -60,10 +61,12 @@ namespace Playground {
                             //assign strings to be parsed to each argument(via a dictionary)
                             foreach (var (argument, text) in command.Arguments.Zip(split.Skip(1), (a,t) => (a,t))) {
                                 string portName = command.Name + ":" + argument.Name;
-                                if (ParseDict.ContainsKey(portName)) { ParseDict[portName] = text;} 
-                                else {ParseDict.Add(portName,text);}
+                                if (Commander.ParseDict.ContainsKey(portName)) { Commander.ParseDict[portName] = text;} 
+                                else {Commander.ParseDict.Add(portName,text);}
                             } 
                             InvokeFlow(command.Name); 
+                            Commander.TriggerEvent(command);
+                            return null;
                         } 
                     }
                 }
@@ -131,6 +134,7 @@ namespace Playground {
                     foreach (CommandAsset.Command.Argument argument in command.Arguments) {
                         string argumentName = argument.Name;
                         string portName = commandName + ":" + argumentName;
+                        var parseDict = Commander.ParseDict;
                         AddDataOutputPort(
                             portName,
                             argument.Type switch {
@@ -142,18 +146,18 @@ namespace Playground {
                                 CommandAsset.ParseType.FLOAT => 
                                     () => {
                                         float parsed = 0.0f;
-                                        bool success = float.TryParse(ParseDict[portName], out parsed);
+                                        bool success = float.TryParse(Commander.ParseDict[portName], out parsed);
                                         return success?parsed:0;
                                     },
                                 CommandAsset.ParseType.INT =>
                                     () => {
                                         int parsed = 0;
-                                        bool success = int.TryParse(ParseDict[portName], out parsed);
+                                        bool success = int.TryParse(Commander.ParseDict[portName], out parsed);
                                         return success?parsed:0;
                                     },
                                 CommandAsset.ParseType.STRING => 
                                     () => {
-                                        return ParseDict.ContainsKey(portName)?ParseDict[portName]:"";
+                                        return Commander.ParseDict.ContainsKey(portName)?Commander.ParseDict[portName]:"";
                                     } 
                             },
                             new DataOutputProperties {

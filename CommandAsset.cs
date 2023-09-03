@@ -3,13 +3,17 @@ using Warudo.Core.Scenes;
 using Cysharp.Threading.Tasks;
 using Warudo.Core.Data;
 using System.Collections.Generic;
+using UnityEngine;
 
 
 namespace Playground {
     [AssetType(Id = "CommandAsset")]
     public class CommandAsset : Asset {
         public enum ParseType {FLOAT, INT, STRING};
+        protected Dictionary<Command,List<OnCommandNode>> ListenerDictionary = new Dictionary<Command,List<OnCommandNode>>();
+        public Dictionary<string, string> ParseDict {get; set;} = new Dictionary<string, string>();
         
+
         //-----------------------------COMMANDS
         [SectionAttribute("Commands",0)]
         [DataInput]
@@ -29,7 +33,7 @@ namespace Playground {
 
         //-----------------------------GROUPS 
         [SectionAttribute("Groups",1)]
-        [DataInput]
+        [DataInput] 
         [Label("Groups")]
         public UserGroup[] Groups; 
         public Dictionary<string, UserGroup> GroupDict = new Dictionary<string, UserGroup>();
@@ -53,8 +57,6 @@ namespace Playground {
         [DataInput]
         [Label("Case-sensitive Names")]
         public bool CaseSensitiveNames = false;
-
-
 
         public class Command : StructuredData<CommandAsset>, ICollapsibleStructuredData {
             [DataInput]
@@ -166,5 +168,27 @@ namespace Playground {
             });
 
         }
+
+        public void RegisterEvent(OnCommandNode listener) {
+            if (listener.Command == null) return;
+            //remove the listener from all other entries! Technically there should max be 1.
+            foreach (Command command in ListenerDictionary.Keys) {
+                ListenerDictionary[command].RemoveAll((OnCommandNode node) => node == listener);
+            }
+            //add listener to dictionary
+            if (ListenerDictionary.ContainsKey(listener.Command)) {
+                ListenerDictionary[listener.Command].Add(listener);
+            } else {
+                ListenerDictionary.Add(listener.Command, new List<OnCommandNode>() {listener});
+            }
+        }
+
+        public void TriggerEvent(Command command) {
+            if (ListenerDictionary.ContainsKey(command)) {
+                foreach (OnCommandNode node in ListenerDictionary[command]) {
+                    node.InvokeFlow(nameof(node.OnCalled));
+                }
+            }
+        }
     }
-}
+} 
