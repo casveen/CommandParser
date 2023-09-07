@@ -23,7 +23,7 @@ namespace Playground {
         [Label("Case-sensitive commands")]
         public bool CaseSensitive = false;
 
-                [DataInput]
+        [DataInput]
         [Label("Command Prefix")]
         public string CommandPrefix = "\\";
 
@@ -127,7 +127,7 @@ namespace Playground {
 
                 [DataInput]
                 [Label("Argument Type")]
-                public ParseType Type;
+                public ParseType ArgumentType;
 
                 public string GetHeader() {
                     return Name??"<Argument name not set>";

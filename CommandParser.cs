@@ -91,8 +91,8 @@ namespace Playground {
  
         protected bool UserIsVerifiedToUse(CommandAsset.Command command) {
             StringComparison comparisonType = Commander.CaseSensitiveNames switch {
-                true  => StringComparison.InvariantCultureIgnoreCase, 
-                false => StringComparison.InvariantCulture
+                false  => StringComparison.InvariantCultureIgnoreCase, 
+                true => StringComparison.InvariantCulture
             };
             if (command.AccesibleToEveryone || 
                 (command.AccesibleToBroadcaster && IsBroadcaster) ||
@@ -137,12 +137,12 @@ namespace Playground {
                         var parseDict = Commander.ParseDict;
                         AddDataOutputPort(
                             portName,
-                            argument.Type switch {
+                            argument.ArgumentType switch {
                                 CommandAsset.ParseType.FLOAT =>  typeof(float),
                                 CommandAsset.ParseType.INT =>    typeof(int),
                                 CommandAsset.ParseType.STRING => typeof(string)
                             },
-                            argument.Type switch {
+                            argument.ArgumentType switch {
                                 CommandAsset.ParseType.FLOAT => 
                                     () => {
                                         float parsed = 0.0f;
